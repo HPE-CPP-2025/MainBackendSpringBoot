@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UrlMapper {
+public class FastApiUrlMapper {
 
     @Value("${fastapi.server.url}")
     private String fastApiServerUrl;

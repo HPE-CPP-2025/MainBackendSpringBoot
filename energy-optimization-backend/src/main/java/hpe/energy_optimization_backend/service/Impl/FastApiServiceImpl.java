@@ -1,7 +1,7 @@
 package hpe.energy_optimization_backend.service.Impl;
 
 import hpe.energy_optimization_backend.service.FastApiService;
-import hpe.energy_optimization_backend.urlMapper.UrlMapper;
+import hpe.energy_optimization_backend.urlMapper.FastApiUrlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class FastApiServiceImpl implements FastApiService {
 
     @Autowired
-    private UrlMapper urlMapper;
+    private FastApiUrlMapper urlMapper;
 
     @Override
     public String forwardRequest(String query, Long homeId) {
