@@ -15,4 +15,6 @@ public interface UserService {
     UserRegistrationResponseDTO registerUser(UserRegistrationRequestDTO userRegistrationDTO);
     UserDetails loadUserByUsername(String username);
     void clearCookies(HttpServletResponse response, String baseUrl);
+    void resetPassword(String token, String newPassword);
+    void forgotPassword(String email);
 }

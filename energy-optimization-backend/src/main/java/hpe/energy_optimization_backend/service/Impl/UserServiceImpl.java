@@ -7,9 +7,12 @@ import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
 import hpe.energy_optimization_backend.enums.Role;
 import hpe.energy_optimization_backend.exception.user.*;
 import hpe.energy_optimization_backend.mapper.UserMapper;
+import hpe.energy_optimization_backend.model.EmailVerification;
 import hpe.energy_optimization_backend.model.User;
+import hpe.energy_optimization_backend.repository.EmailVerificationRepository;
 import hpe.energy_optimization_backend.repository.UserRepository;
 import hpe.energy_optimization_backend.security.jwt.JwtUtils;
+import hpe.energy_optimization_backend.service.EmailService;
 import hpe.energy_optimization_backend.service.RefreshTokenService;
 import hpe.energy_optimization_backend.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -32,10 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -46,16 +46,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationRepository emailVerificationRepository;
+    private final EmailService emailService;
     public UserServiceImpl(JwtUtils jwtUtils,
                            @Lazy AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RefreshTokenService refreshTokenService,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           EmailVerificationRepository emailVerificationRepository,
+                           EmailService emailService) {
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
+        this.emailVerificationRepository = emailVerificationRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -141,7 +147,39 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while registering the user", e);
         }
     }
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+        String token = UUID.randomUUID().toString().replaceAll("[^0-9]", "").substring(0, 6);
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.setUserId(user.getUserId());
+        emailVerification.setVerificationCode(token);
+        emailVerification.setEmail(email);
+        emailVerification.setStatus("pending");
+        emailVerification.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        emailVerification.setCreatedAt(LocalDateTime.now());
+        emailVerificationRepository.save(emailVerification);
 
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+    public void resetPassword(String token, String newPassword) {
+        EmailVerification emailVerification = emailVerificationRepository.findByVerificationCode(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid verification code"));
+
+        if (emailVerification.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Verification code has expired");
+        }
+
+        User user = userRepository.findById(emailVerification.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        emailVerification.setStatus("verified");
+        emailVerificationRepository.save(emailVerification);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -155,6 +193,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 createAuthorities(user.getRole())
         );
     }
+
     private static List<GrantedAuthority> createAuthorities(Role role) {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }

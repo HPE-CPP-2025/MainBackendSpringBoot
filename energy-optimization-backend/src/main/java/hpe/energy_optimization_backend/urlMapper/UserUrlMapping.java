@@ -10,5 +10,6 @@ public class UserUrlMapping {
     public static final String USER_REGISTER = BASE_API + "/register"; // Register a new user
     public static final String USER_LOGIN = BASE_API + "/login"; // User login
     public static final String USER_LOGOUT = BASE_API + "/logout"; // User logout
-    public static final String VERIFY_EMAIL = BASE_API + "/verify-email"; // Verify user email
+    public static final String FORGOT_PASSWORD = BASE_API + "/forgot-password"; // Forgot password (trigger reset, no userId)
+    public static final String RESET_PASSWORD = BASE_API + "/reset-password"; // Reset password (requires JWT for user verification)
 }

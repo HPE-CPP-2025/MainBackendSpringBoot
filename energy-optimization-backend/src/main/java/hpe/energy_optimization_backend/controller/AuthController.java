@@ -1,10 +1,14 @@
 package hpe.energy_optimization_backend.controller;
 
 
+import hpe.energy_optimization_backend.dto.request.ResetPasswordRequestDTO;
 import hpe.energy_optimization_backend.dto.request.UserLoginRequestDTO;
 import hpe.energy_optimization_backend.dto.request.UserRegistrationRequestDTO;
+import hpe.energy_optimization_backend.dto.request.VerifyEmailRequestDTO;
+import hpe.energy_optimization_backend.dto.response.ResetPasswordResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
+import hpe.energy_optimization_backend.dto.response.VerifyEmailResponseDTO;
 import hpe.energy_optimization_backend.service.Impl.RefreshTokenServiceImpl;
 import hpe.energy_optimization_backend.service.UserService;
 import hpe.energy_optimization_backend.urlMapper.UserUrlMapping;
@@ -17,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+//import hpe.energy_optimization_backend.dto.response.VerifyEmailResponseDTO;
+//import hpe.energy_optimization_backend.dto.request.VerifyEmailRequestDTO;
+//import hpe.energy_optimization_backend.dto.request.ResetPasswordRequestDTO;
 import java.util.Map;
 
 @RestController
@@ -86,21 +92,21 @@ public class AuthController {
         return ResponseEntity.ok("User logged out successfully.");
     }
 
-//
-//    @PostMapping(UserUrlMapping.FORGOT_PASSWORD)
-//    @PreAuthorize("permitAll()")
-//    public ResponseEntity<VerifyEmailResponseDTO> forgotPassword(@RequestBody VerifyEmailRequestDTO verifyEmailRequestDTO) {
-//        userService.forgotPassword(verifyEmailRequestDTO.getEmail());
-//        return ResponseEntity.ok(new VerifyEmailResponseDTO("Password reset email sent successfully."));
-//    }
-//
-//    @PostMapping(UserUrlMapping.RESET_PASSWORD)
-//    @PreAuthorize("permitAll()")
-//    public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
-//        userService.resetPassword(resetPasswordRequestDTO.getToken(), resetPasswordRequestDTO.getNewPassword());
-//        return ResponseEntity.ok(new ResetPasswordResponseDTO("Password has been reset successfully."));
-//    }
-//
+
+    @PostMapping(UserUrlMapping.FORGOT_PASSWORD)
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<VerifyEmailResponseDTO> forgotPassword(@RequestBody VerifyEmailRequestDTO verifyEmailRequestDTO) {
+        userService.forgotPassword(verifyEmailRequestDTO.getEmail());
+        return ResponseEntity.ok(new VerifyEmailResponseDTO("Password reset email sent successfully."));
+    }
+
+    @PostMapping(UserUrlMapping.RESET_PASSWORD)
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
+        userService.resetPassword(resetPasswordRequestDTO.getToken(), resetPasswordRequestDTO.getNewPassword());
+        return ResponseEntity.ok(new ResetPasswordResponseDTO("Password has been reset successfully."));
+    }
+
 //    @PostMapping(UserUrlMapping.RENEW_TOKEN)
 //    public ResponseEntity<?> renewToken(@CookieValue("refreshToken") String refreshToken,
 //                                        HttpServletResponse response) {

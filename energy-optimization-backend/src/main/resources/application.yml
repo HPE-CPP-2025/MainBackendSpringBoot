@@ -20,8 +20,20 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 fastapi:
   server:
     url: ${FASTAPI_SERVER_URL}
+
 allowed:
   origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:5500}

@@ -45,8 +45,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(
-//                                UserUrlMapping.FORGOT_PASSWORD,
-//                                UserUrlMapping.RESET_PASSWORD,
+                                UserUrlMapping.FORGOT_PASSWORD,
+                                UserUrlMapping.RESET_PASSWORD,
                                 UserUrlMapping.USER_REGISTER,
                                 UserUrlMapping.USER_LOGIN,
 //                                UserUrlMapping.RENEW_TOKEN,
