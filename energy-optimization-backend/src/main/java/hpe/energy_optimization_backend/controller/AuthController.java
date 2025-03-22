@@ -8,6 +8,8 @@ import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
 import hpe.energy_optimization_backend.dto.response.VerifyEmailResponseDTO;
 import hpe.energy_optimization_backend.exception.token.MissingRequestCookieException;
 import hpe.energy_optimization_backend.exception.user.UserNotFoundException;
+import hpe.energy_optimization_backend.mapper.UserMapper;
+import hpe.energy_optimization_backend.model.User;
 import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.Impl.RefreshTokenServiceImpl;
 import hpe.energy_optimization_backend.service.UserService;
@@ -15,6 +17,8 @@ import hpe.energy_optimization_backend.urlMapper.UserUrlMapping;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -145,5 +149,22 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .body(responseDTO);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(UserUrlMapping.GET_ALL_USERS_BY_PROFILE_STATUS)
+    public ResponseEntity<Page<UserDetailsSummaryResponseDTO>> getAllUsers(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+
+        try {
+            Page<User> users = userService.getUsersByFilters(status, search, pageable);
+            Page<UserDetailsSummaryResponseDTO> response = users.map(UserMapper::toUserDetailsSummaryResponseDTO);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error retrieving users", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

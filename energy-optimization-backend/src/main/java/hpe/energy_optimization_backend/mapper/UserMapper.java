@@ -1,5 +1,6 @@
 package hpe.energy_optimization_backend.mapper;
 
+import hpe.energy_optimization_backend.dto.request.UserDetailsSummaryResponseDTO;
 import hpe.energy_optimization_backend.dto.request.UserRegistrationRequestDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
@@ -26,7 +27,14 @@ public class UserMapper {
                 .role(user.getRole().name())
                 .build();
     }
-
+    public static UserDetailsSummaryResponseDTO toUserDetailsSummaryResponseDTO(User user) {
+        return new UserDetailsSummaryResponseDTO(
+                user.getUserId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getProfileStatus().name()
+        );
+    }
     public static User toEntity(UserRegistrationRequestDTO dto, String encodedPassword) {
         User user = new User();
         user.setUsername(dto.getUsername());

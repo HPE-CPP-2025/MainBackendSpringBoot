@@ -14,5 +14,5 @@ public class UserUrlMapping {
     public static final String RESET_PASSWORD = BASE_API + "/reset-password"; // Reset password (requires JWT for user verification)
     public static final String CHANGE_PASSWORD = BASE_API  + "/change-password";
     public static final String RENEW_TOKEN = BASE_API + "/renew-token"; // Refresh JWT token
-
+    public static final String GET_ALL_USERS_BY_PROFILE_STATUS = BASE_API + "/all";
 }

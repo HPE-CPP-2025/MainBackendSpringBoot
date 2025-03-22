@@ -21,6 +21,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -214,7 +216,32 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+    @Transactional(readOnly = true)
+    public Page<User> getUsersByFilters(String status, String searchTerm, Pageable pageable) {
 
+        ProfileStatus profileStatus = null;
+        if (status != null && !status.isEmpty()) {
+            try {
+                profileStatus = ProfileStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid profile status: " + status);
+            }
+        }
+
+        // Normalize search term
+        String normalizedSearch = searchTerm != null ? searchTerm.trim() : null;
+        if (normalizedSearch != null && normalizedSearch.isEmpty()) {
+            normalizedSearch = null;
+        }
+
+        Page<User> users;
+        if (normalizedSearch == null) {
+            users = userRepository.findUsersWithFilters(profileStatus, pageable);
+        } else {
+            users = userRepository.findUsersWithFilters(profileStatus, normalizedSearch, pageable);
+        }
+        return users;
+    }
     public void clearCookies(HttpServletResponse response, String baseUrl) {
         log.info("Clearing refresh token cookie");
 
