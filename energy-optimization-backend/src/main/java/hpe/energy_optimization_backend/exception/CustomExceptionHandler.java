@@ -1,6 +1,7 @@
 package hpe.energy_optimization_backend.exception;
 
 import hpe.energy_optimization_backend.exception.token.JwtTokenExpiredException;
+import hpe.energy_optimization_backend.exception.token.MissingRequestCookieException;
 import hpe.energy_optimization_backend.exception.token.RefreshTokenException;
 import hpe.energy_optimization_backend.exception.user.*;
 import jakarta.persistence.EmbeddedId;
@@ -15,6 +16,11 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<String> handleMissingRequestCookieException(MissingRequestCookieException ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(UsernameAlreadyInUseException.class)
     public ResponseEntity<String> handleUsernameAlreadyInUseException(UsernameAlreadyInUseException ex) {

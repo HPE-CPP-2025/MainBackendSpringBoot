@@ -6,6 +6,7 @@ import hpe.energy_optimization_backend.dto.response.ResetPasswordResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
 import hpe.energy_optimization_backend.dto.response.VerifyEmailResponseDTO;
+import hpe.energy_optimization_backend.exception.token.MissingRequestCookieException;
 import hpe.energy_optimization_backend.exception.user.UserNotFoundException;
 import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.Impl.RefreshTokenServiceImpl;
@@ -123,26 +124,26 @@ public class AuthController {
         }
     }
 
-//    @PostMapping(UserUrlMapping.RENEW_TOKEN)
-//    public ResponseEntity<?> renewToken(@CookieValue("refreshToken") String refreshToken,
-//                                        HttpServletResponse response) {
-//        if (refreshToken == null) {
-//            throw new MissingRequestCookieException("Required cookie 'refreshToken' is not present");
-//        }
-//
-//        Map<String, Object> renewResponse = refreshTokenService.renewToken(refreshToken);
-//
-//        String newAccessToken = (String) renewResponse.get("accessToken");
-//        String newRefreshToken = (String) renewResponse.get("refreshToken");
-//        UserLoginResponseDTO responseDTO = (UserLoginResponseDTO) renewResponse.get("user");
-//
-//        // Set new refresh token as HttpOnly cookie
-//        refreshTokenService.setSecureRefreshTokenCookie(response, newRefreshToken);
-//        String bearerToken = "Bearer " + newAccessToken;
-//
-//        // Return new access token in Authorization header and user data in body
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.AUTHORIZATION, bearerToken)
-//                .body(responseDTO);
-//    }
+    @PostMapping(UserUrlMapping.RENEW_TOKEN)
+    public ResponseEntity<?> renewToken(@CookieValue("refreshToken") String refreshToken,
+                                        HttpServletResponse response) {
+        if (refreshToken == null) {
+            throw new MissingRequestCookieException("Required cookie 'refreshToken' is not present");
+        }
+
+        Map<String, Object> renewResponse = refreshTokenService.renewToken(refreshToken);
+
+        String newAccessToken = (String) renewResponse.get("accessToken");
+        String newRefreshToken = (String) renewResponse.get("refreshToken");
+        UserLoginResponseDTO responseDTO = (UserLoginResponseDTO) renewResponse.get("user");
+
+        // Set new refresh token as HttpOnly cookie
+        refreshTokenService.setSecureRefreshTokenCookie(response, newRefreshToken);
+        String bearerToken = "Bearer " + newAccessToken;
+
+        // Return new access token in Authorization header and user data in body
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, bearerToken)
+                .body(responseDTO);
+    }
 }
