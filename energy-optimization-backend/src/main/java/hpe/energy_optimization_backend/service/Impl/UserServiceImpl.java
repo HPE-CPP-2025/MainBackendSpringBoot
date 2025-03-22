@@ -4,6 +4,7 @@ import hpe.energy_optimization_backend.dto.request.UserLoginRequestDTO;
 import hpe.energy_optimization_backend.dto.request.UserRegistrationRequestDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
+import hpe.energy_optimization_backend.enums.ProfileStatus;
 import hpe.energy_optimization_backend.enums.Role;
 import hpe.energy_optimization_backend.exception.user.*;
 import hpe.energy_optimization_backend.mapper.UserMapper;
@@ -90,6 +91,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (user == null) {
             log.error("User not found after authentication: {}", userDetails.getUsername());
             throw new UsernameNotFoundException("User not found");
+        }else if(user.getProfileStatus() != ProfileStatus.ACTIVE){
+            log.error("User is not active: {}", userDetails.getUsername());
+            throw new UserNotActiveException("User is not active");
         }
 
         userRepository.save(user);
@@ -148,6 +152,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while registering the user", e);
         }
     }
+
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {

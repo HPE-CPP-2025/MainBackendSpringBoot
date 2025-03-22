@@ -17,6 +17,11 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
+    @ExceptionHandler(UserNotActiveException.class)
+    public ResponseEntity<String> handleUserNotActiveException(UserNotActiveException ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity<String> handleMissingRequestCookieException(MissingRequestCookieException ex) {
         return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);

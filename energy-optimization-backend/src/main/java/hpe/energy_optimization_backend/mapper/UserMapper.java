@@ -3,6 +3,7 @@ package hpe.energy_optimization_backend.mapper;
 import hpe.energy_optimization_backend.dto.request.UserRegistrationRequestDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
+import hpe.energy_optimization_backend.enums.ProfileStatus;
 import hpe.energy_optimization_backend.enums.Role;
 import hpe.energy_optimization_backend.model.User;
 import lombok.Builder;
@@ -31,6 +32,7 @@ public class UserMapper {
         user.setUsername(dto.getUsername());
         user.setPassword(encodedPassword);
         user.setRole(Role.HOUSE_OWNER);
+        user.setProfileStatus(ProfileStatus.INACTIVE);
         user.setEmail(dto.getEmail());
         return user;
     }

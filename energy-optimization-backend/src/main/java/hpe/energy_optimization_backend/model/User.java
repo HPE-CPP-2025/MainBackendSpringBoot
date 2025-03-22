@@ -1,5 +1,6 @@
 package hpe.energy_optimization_backend.model;
 
+import hpe.energy_optimization_backend.enums.ProfileStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import hpe.energy_optimization_backend.enums.Role;
@@ -29,6 +30,10 @@ public class User implements Serializable {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "profile_status", nullable = false)
+    private ProfileStatus profileStatus;
 
     @Column(name = "role", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
