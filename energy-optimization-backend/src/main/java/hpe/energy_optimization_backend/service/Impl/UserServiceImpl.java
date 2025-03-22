@@ -283,4 +283,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("Cookie cleared - Path: /, MaxAge: 0, Secure: {}, SameSite: {}",
                 isSecure, sameSite);
     }
+
+    @Override
+    public void updateUserProfileStatus(Long userId, String profileStatus) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        ProfileStatus newProfileStatus;
+        try {
+            newProfileStatus = ProfileStatus.valueOf(profileStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid profile status: " + profileStatus);
+        }
+
+        user.setProfileStatus(newProfileStatus);
+        userRepository.save(user);
+    }
 }

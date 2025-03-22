@@ -167,4 +167,15 @@ public class AuthController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping(UserUrlMapping.UPDATE_USER_PROFILE_STATUS)
+    public ResponseEntity<String> updateUserProfileStatus(@RequestBody UpdateUserProfileStatusRequestDTO updateUserProfileStatusRequestDTO) {
+        try {
+            userService.updateUserProfileStatus(updateUserProfileStatusRequestDTO.getUserId(), updateUserProfileStatusRequestDTO.getProfileStatus());
+            return ResponseEntity.ok("User profile status updated successfully.");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + updateUserProfileStatusRequestDTO.getUserId());
+        }
+    }
 }

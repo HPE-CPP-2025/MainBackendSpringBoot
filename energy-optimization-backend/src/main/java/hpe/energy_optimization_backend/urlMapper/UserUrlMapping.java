@@ -15,4 +15,5 @@ public class UserUrlMapping {
     public static final String CHANGE_PASSWORD = BASE_API  + "/change-password";
     public static final String RENEW_TOKEN = BASE_API + "/renew-token"; // Refresh JWT token
     public static final String GET_ALL_USERS_BY_PROFILE_STATUS = BASE_API + "/all";
+    public static final String UPDATE_USER_PROFILE_STATUS = BASE_API + "/profile-status";
 }

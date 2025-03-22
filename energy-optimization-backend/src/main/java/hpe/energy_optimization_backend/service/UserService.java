@@ -21,5 +21,6 @@ public interface UserService {
     void forgotPassword(String email);
     void changePasswordById(Long userId, String oldPassword, String newPassword);
     Page<User> getUsersByFilters(String status, String searchTerm, Pageable pageable);
+    void updateUserProfileStatus(Long userId, String profileStatus);
 
 }
