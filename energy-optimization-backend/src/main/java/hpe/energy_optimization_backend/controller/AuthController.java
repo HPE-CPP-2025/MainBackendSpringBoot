@@ -1,14 +1,13 @@
 package hpe.energy_optimization_backend.controller;
 
 
-import hpe.energy_optimization_backend.dto.request.ResetPasswordRequestDTO;
-import hpe.energy_optimization_backend.dto.request.UserLoginRequestDTO;
-import hpe.energy_optimization_backend.dto.request.UserRegistrationRequestDTO;
-import hpe.energy_optimization_backend.dto.request.VerifyEmailRequestDTO;
+import hpe.energy_optimization_backend.dto.request.*;
 import hpe.energy_optimization_backend.dto.response.ResetPasswordResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserLoginResponseDTO;
 import hpe.energy_optimization_backend.dto.response.UserRegistrationResponseDTO;
 import hpe.energy_optimization_backend.dto.response.VerifyEmailResponseDTO;
+import hpe.energy_optimization_backend.exception.user.UserNotFoundException;
+import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.Impl.RefreshTokenServiceImpl;
 import hpe.energy_optimization_backend.service.UserService;
 import hpe.energy_optimization_backend.urlMapper.UserUrlMapping;
@@ -32,13 +31,15 @@ public class AuthController {
     private final String baseUrl;
     private final UserService userService;
     private final RefreshTokenServiceImpl refreshTokenService;
+    private final JwtUtils jwtUtils;
 
     public AuthController(UserService userService,
                           RefreshTokenServiceImpl refreshTokenService,
-                          @Value("${spring.app.base-url}") String baseUrl) {
+                          @Value("${spring.app.base-url}") String baseUrl, JwtUtils jwtUtils) {
         this.userService = userService;
         this.refreshTokenService = refreshTokenService;
         this.baseUrl = baseUrl;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping(UserUrlMapping.USER_REGISTER)
@@ -105,6 +106,21 @@ public class AuthController {
     public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
         userService.resetPassword(resetPasswordRequestDTO.getToken(), resetPasswordRequestDTO.getNewPassword());
         return ResponseEntity.ok(new ResetPasswordResponseDTO("Password has been reset successfully."));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping(UserUrlMapping.CHANGE_PASSWORD)
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+        Long userId = Long.valueOf(jwtUtils.getUserIdFromContext());
+
+        try {
+            userService.changePasswordById(userId, changePasswordRequestDTO.getOldPassword(), changePasswordRequestDTO.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + userId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 //    @PostMapping(UserUrlMapping.RENEW_TOKEN)

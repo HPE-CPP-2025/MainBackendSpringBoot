@@ -17,4 +17,6 @@ public interface UserService {
     void clearCookies(HttpServletResponse response, String baseUrl);
     void resetPassword(String token, String newPassword);
     void forgotPassword(String email);
+    void changePasswordById(Long userId, String oldPassword, String newPassword);
+
 }

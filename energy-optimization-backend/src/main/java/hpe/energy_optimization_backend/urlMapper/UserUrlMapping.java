@@ -12,4 +12,5 @@ public class UserUrlMapping {
     public static final String USER_LOGOUT = BASE_API + "/logout"; // User logout
     public static final String FORGOT_PASSWORD = BASE_API + "/forgot-password"; // Forgot password (trigger reset, no userId)
     public static final String RESET_PASSWORD = BASE_API + "/reset-password"; // Reset password (requires JWT for user verification)
+    public static final String CHANGE_PASSWORD = BASE_API  + "/change-password";
 }

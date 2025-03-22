@@ -15,6 +15,7 @@ import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.EmailService;
 import hpe.energy_optimization_backend.service.RefreshTokenService;
 import hpe.energy_optimization_backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -196,6 +197,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private static List<GrantedAuthority> createAuthorities(Role role) {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+    public void changePasswordById(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public void clearCookies(HttpServletResponse response, String baseUrl) {
