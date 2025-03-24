@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserLoginResponseDTO {
     private Long userId;
+    private Long homeId;
     private String email;
     private String username;
     private String role;
