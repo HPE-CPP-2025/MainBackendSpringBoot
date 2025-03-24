@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 UserUrlMapping.RESET_PASSWORD,
                                 UserUrlMapping.USER_REGISTER,
                                 UserUrlMapping.USER_LOGIN,
-//                                UserUrlMapping.RENEW_TOKEN,
+                                UserUrlMapping.RENEW_TOKEN,
                                 "/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

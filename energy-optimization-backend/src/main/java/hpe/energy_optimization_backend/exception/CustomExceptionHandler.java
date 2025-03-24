@@ -1,8 +1,10 @@
 package hpe.energy_optimization_backend.exception;
 
+import hpe.energy_optimization_backend.exception.houseAndDevice.DeviceNotFoundException;
 import hpe.energy_optimization_backend.exception.token.JwtTokenExpiredException;
 import hpe.energy_optimization_backend.exception.token.MissingRequestCookieException;
 import hpe.energy_optimization_backend.exception.token.RefreshTokenException;
+import hpe.energy_optimization_backend.exception.houseAndDevice.HouseNotFoundException;
 import hpe.energy_optimization_backend.exception.user.*;
 import jakarta.persistence.EmbeddedId;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -16,6 +18,21 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex){
+        return createErrorResponse(ex.getMessage(),HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(DeviceNotFoundException.class)
+    public ResponseEntity<String> handleDeviceNotFoundException(DeviceNotFoundException ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(HouseNotFoundException.class)
+    public ResponseEntity<String> handleHouseNotFoundException(HouseNotFoundException ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(UserNotActiveException.class)
     public ResponseEntity<String> handleUserNotActiveException(UserNotActiveException ex) {

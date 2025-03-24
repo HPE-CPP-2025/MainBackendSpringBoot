@@ -2,6 +2,7 @@ package hpe.energy_optimization_backend.security.jwt;
 
 import hpe.energy_optimization_backend.config.ApplicationConfig;
 import hpe.energy_optimization_backend.exception.token.JwtTokenExpiredException;
+import hpe.energy_optimization_backend.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -25,11 +26,13 @@ public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     private final ApplicationConfig applicationConfig;
+    private final UserRepository userRepository;
 
 
     @Autowired
-    public JwtUtils(ApplicationConfig applicationConfig) {
+    public JwtUtils(ApplicationConfig applicationConfig, UserRepository userRepository) {
         this.applicationConfig = applicationConfig;
+        this.userRepository = userRepository;
     }
 
     public String getJwtFromHeader(HttpServletRequest request) {
@@ -43,10 +46,17 @@ public class JwtUtils {
 
     public String generateTokenFromUsername(UserDetails userDetails, Long userId) {
         String username = userDetails.getUsername();
+
+        // Find the house ID for this user
+        Long houseId = userRepository.findById(userId)
+                .map(user -> user.getHouse() != null ? user.getHouse().getHouseId() : null)
+                .orElse(null);
+
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
                 .orElse("ROLE_HOUSE_OWNER"); // Default role if not found
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + applicationConfig.getJwtExpirationMs());
 
@@ -56,6 +66,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .claim("role", role) // Add role claim
                 .claim("userId", userId) // Add userId claim
+                .claim("houseId", houseId) // Add houseId claim
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -88,6 +99,15 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("userId", Integer.class);
+    }
+
+    public Long getHouseIdFromJwtToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("houseId", Long.class);
     }
 
     private Key key() {
@@ -127,6 +147,12 @@ public class JwtUtils {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String jwt = getJwtFromHeader(request);
         return getUserIdFromJwtToken(jwt);
+    }
+
+    public Long getHouseIdFromContext(){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String jwt = getJwtFromHeader(request);
+        return getHouseIdFromJwtToken(jwt);
     }
 
     public boolean isAdminFromContext() {
