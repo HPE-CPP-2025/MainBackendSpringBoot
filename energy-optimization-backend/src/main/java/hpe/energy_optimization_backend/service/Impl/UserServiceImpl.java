@@ -52,13 +52,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
+    private final UserMapper userMapper;
+
     public UserServiceImpl(JwtUtils jwtUtils,
                            @Lazy AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RefreshTokenService refreshTokenService,
                            PasswordEncoder passwordEncoder,
                            EmailVerificationRepository emailVerificationRepository,
-                           EmailService emailService) {
+                           EmailService emailService,
+                           UserMapper userMapper) {
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -66,6 +69,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationRepository = emailVerificationRepository;
         this.emailService = emailService;
+        this.userMapper = userMapper;
     }
 
     @Transactional
@@ -113,6 +117,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("Login successful for user: {}", user.getEmail());
         return response;
     }
+
     private boolean isValidEmail(String email) {
         // Regular expression for validating an email address
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
@@ -142,11 +147,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         if (userRepository.existsByUsername(trimmedUserName)) {
-            throw new UsernameAlreadyInUseException("Anonymous name is already in use: " + trimmedUserName);
+            throw new UsernameAlreadyInUseException("username is already in use: " + trimmedUserName);
         }
 
         try {
-            User user = UserMapper.toEntity(userRegistrationDTO, passwordEncoder.encode(userRegistrationDTO.getPassword()));
+            // Use the injected userMapper instance instead of the static method
+            User user = userMapper.toEntity(userRegistrationDTO, passwordEncoder.encode(userRegistrationDTO.getPassword()));
             user.setUsername(trimmedUserName);
             userRepository.save(user);
             return UserMapper.toRegistrationResponseDTO(user);
@@ -172,6 +178,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         emailService.sendPasswordResetEmail(user.getEmail(), token);
     }
+
     public void resetPassword(String token, String newPassword) {
         EmailVerification emailVerification = emailVerificationRepository.findByVerificationCode(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid verification code"));
@@ -205,6 +212,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private static List<GrantedAuthority> createAuthorities(Role role) {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
     public void changePasswordById(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
@@ -216,6 +224,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
     @Transactional(readOnly = true)
     public Page<User> getUsersByFilters(String status, String searchTerm, Pageable pageable) {
 
@@ -242,6 +251,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         return users;
     }
+
     public void clearCookies(HttpServletResponse response, String baseUrl) {
         log.info("Clearing refresh token cookie");
 

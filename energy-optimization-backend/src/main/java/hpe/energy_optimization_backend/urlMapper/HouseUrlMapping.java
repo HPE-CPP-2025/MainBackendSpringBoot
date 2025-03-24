@@ -7,5 +7,4 @@ public class HouseUrlMapping {
     public static final String UPDATE_HOUSE = "/{houseId}";
     public static final String DELETE_HOUSE = "/{houseId}";
     public static final String GET_ALL_HOUSES = "";
-    public static final String ASSIGN_USER_TO_HOUSE = "/{houseId}/users/{userId}";
 }

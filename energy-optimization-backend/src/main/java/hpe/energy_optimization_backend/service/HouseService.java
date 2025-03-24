@@ -11,5 +11,4 @@ public interface HouseService {
     List<HouseResponseDTO> getAllHouses();
     HouseResponseDTO updateHouse(Long houseId, HouseRequestDTO houseRequestDTO);
     void deleteHouse(Long houseId);
-    void assignUserToHouse(Long houseId, Long userId);
 }

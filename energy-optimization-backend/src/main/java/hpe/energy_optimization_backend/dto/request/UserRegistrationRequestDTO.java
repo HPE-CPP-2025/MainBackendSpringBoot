@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class UserRegistrationRequestDTO {
     private String email;
     private String password;
+    private String houseId;
     private String username;
 }

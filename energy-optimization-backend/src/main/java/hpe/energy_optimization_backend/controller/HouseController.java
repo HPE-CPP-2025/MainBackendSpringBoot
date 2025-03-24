@@ -46,11 +46,5 @@ public class HouseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(HouseUrlMapping.ASSIGN_USER_TO_HOUSE)
-    public ResponseEntity<Void> assignUserToHouse(
-            @PathVariable Long houseId,
-            @PathVariable Long userId) {
-        houseService.assignUserToHouse(houseId, userId);
-        return ResponseEntity.ok().build();
-    }
+
 }

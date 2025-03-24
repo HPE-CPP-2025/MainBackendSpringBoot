@@ -59,17 +59,6 @@ public class HouseServiceImpl implements HouseService {
         houseRepository.delete(house);
     }
 
-    @Override
-    @Transactional
-    public void assignUserToHouse(Long houseId, Long userId) {
-        House house = findHouseById(houseId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-
-        user.setHouse(house);
-        userRepository.save(user);
-    }
-
     private House findHouseById(Long houseId) {
         return houseRepository.findById(houseId)
                 .orElseThrow(() -> new HouseNotFoundException("House not found with id: " + houseId));
