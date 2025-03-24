@@ -1,4 +1,3 @@
-// File: src/main/java/hpe/energy_optimization_backend/service/impl/DeviceServiceImpl.java
 package hpe.energy_optimization_backend.service.Impl;
 
 import hpe.energy_optimization_backend.dto.request.DeviceRequestDTO;

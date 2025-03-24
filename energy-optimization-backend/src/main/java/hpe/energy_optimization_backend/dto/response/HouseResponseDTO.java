@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserLoginResponseDTO {
-    private Long userId;
+public class HouseResponseDTO {
     private Long houseId;
-    private String email;
-    private String username;
-    private String role;
+    private String houseName;
+    private String location;
 }
