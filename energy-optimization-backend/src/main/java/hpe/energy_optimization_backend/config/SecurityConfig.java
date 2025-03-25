@@ -1,6 +1,7 @@
 package hpe.energy_optimization_backend.config;
 
 import hpe.energy_optimization_backend.security.CustomAccessDeniedHandler;
+import hpe.energy_optimization_backend.security.filter.SseAuthenticationFilter;
 import hpe.energy_optimization_backend.security.jwt.*;
 import hpe.energy_optimization_backend.urlMapper.UserUrlMapping;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +28,18 @@ public class SecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;
     private final CorsConfig corsConfig;
+    private final SseAuthenticationFilter sseAuthenticationFilter;
 
     public SecurityConfig(
             AuthEntryPointJwt unauthorizedHandler,
             AuthTokenFilter authTokenFilter,
-            CorsConfig corsConfig
+            CorsConfig corsConfig,
+            SseAuthenticationFilter sseAuthenticationFilter
     ) {
         this.unauthorizedHandler = unauthorizedHandler;
         this.authTokenFilter = authTokenFilter;
         this.corsConfig = corsConfig;
+        this.sseAuthenticationFilter = sseAuthenticationFilter;
     }
 
     @Bean
@@ -68,6 +72,7 @@ public class SecurityConfig {
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(sseAuthenticationFilter, AuthTokenFilter.class)
                 .build();
     }
 
