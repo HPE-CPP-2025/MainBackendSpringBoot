@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     List<Device> findByHouse_HouseId(Long houseId);
+
 }

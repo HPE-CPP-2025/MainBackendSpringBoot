@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<jwt.version>0.11.5</jwt.version>
+		<caffeine.version>3.1.8</caffeine.version>
 	</properties>
 
 
@@ -92,6 +93,12 @@
 			<version>${jwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${caffeine.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
