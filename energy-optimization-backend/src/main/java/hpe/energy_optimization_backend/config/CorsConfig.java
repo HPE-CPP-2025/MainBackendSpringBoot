@@ -48,8 +48,7 @@ public class CorsConfig {
                 "Access-Control-Request-Headers",
                 HttpHeaders.IF_NONE_MATCH,
                 HttpHeaders.COOKIE,              // Added for cookie support
-                "Set-Cookie",                    // Added for cookie support
-                "X-XSRF-TOKEN"                   // If you're using CSRF
+                "Set-Cookie"                    // Added for cookie support
         );
         log.debug("Allowed headers: {}", allowedHeaders);
         configuration.setAllowedHeaders(allowedHeaders);

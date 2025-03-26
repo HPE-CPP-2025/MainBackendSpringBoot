@@ -31,6 +31,11 @@ public class SseAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            // Skip JWT/SSE processing if already authenticated (e.g., via API key)
+            filterChain.doFilter(request, response);
+            return;
+        }
         if (request.getRequestURI().contains("/subscribe")) {
             String token = request.getParameter("token");
 

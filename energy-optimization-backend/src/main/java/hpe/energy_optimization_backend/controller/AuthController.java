@@ -100,20 +100,17 @@ public class AuthController {
 
 
     @PostMapping(UserUrlMapping.FORGOT_PASSWORD)
-    @PreAuthorize("permitAll()")
     public ResponseEntity<VerifyEmailResponseDTO> forgotPassword(@RequestBody VerifyEmailRequestDTO verifyEmailRequestDTO) {
         userService.forgotPassword(verifyEmailRequestDTO.getEmail());
         return ResponseEntity.ok(new VerifyEmailResponseDTO("Password reset email sent successfully."));
     }
 
     @PostMapping(UserUrlMapping.RESET_PASSWORD)
-    @PreAuthorize("permitAll()")
     public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
         userService.resetPassword(resetPasswordRequestDTO.getToken(), resetPasswordRequestDTO.getNewPassword());
         return ResponseEntity.ok(new ResetPasswordResponseDTO("Password has been reset successfully."));
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PutMapping(UserUrlMapping.CHANGE_PASSWORD)
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
         Long userId = Long.valueOf(jwtUtils.getUserIdFromContext());

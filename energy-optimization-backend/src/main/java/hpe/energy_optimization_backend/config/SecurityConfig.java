@@ -1,8 +1,10 @@
 package hpe.energy_optimization_backend.config;
 
 import hpe.energy_optimization_backend.security.CustomAccessDeniedHandler;
+import hpe.energy_optimization_backend.security.filter.ApiKeyAuthFilter;
 import hpe.energy_optimization_backend.security.filter.SseAuthenticationFilter;
 import hpe.energy_optimization_backend.security.jwt.*;
+import hpe.energy_optimization_backend.urlMapper.ApiKeyUrlMapping;
 import hpe.energy_optimization_backend.urlMapper.UserUrlMapping;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +20,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,22 +30,24 @@ public class SecurityConfig {
     private final AuthTokenFilter authTokenFilter;
     private final CorsConfig corsConfig;
     private final SseAuthenticationFilter sseAuthenticationFilter;
+    private final ApiKeyAuthFilter apiKeyAuthFilter;
 
     public SecurityConfig(
             AuthEntryPointJwt unauthorizedHandler,
             AuthTokenFilter authTokenFilter,
             CorsConfig corsConfig,
-            SseAuthenticationFilter sseAuthenticationFilter
+            SseAuthenticationFilter sseAuthenticationFilter,
+            ApiKeyAuthFilter apiKeyAuthFilter
     ) {
         this.unauthorizedHandler = unauthorizedHandler;
         this.authTokenFilter = authTokenFilter;
         this.corsConfig = corsConfig;
         this.sseAuthenticationFilter = sseAuthenticationFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAccessDeniedHandler customAccessDeniedHandler) throws Exception {
-        // First add the rate limiting filter
         return http
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(requests -> requests
@@ -63,6 +66,7 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/info"
                         ).permitAll()
+                        .requestMatchers(ApiKeyUrlMapping.BASE_API + "/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -71,6 +75,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(sseAuthenticationFilter, AuthTokenFilter.class)
                 .build();
