@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/**",
                                 "/api/public/**",
+                                "/api/health",
                                 "/actuator/health",
                                 "/actuator/info"
                         ).permitAll()
