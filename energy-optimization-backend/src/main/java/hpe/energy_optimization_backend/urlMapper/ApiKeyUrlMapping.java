@@ -10,4 +10,5 @@ public final class ApiKeyUrlMapping {
     public static final String GET_ALL_API_KEYS = BASE_API;
     public static final String TOGGLE_API_KEY_STATUS = BASE_API + "/{id}/status";
     public static final String GET_API_KEY_DETAILS = BASE_API + "/{id}/details";
+    public static final String DELETE_API_KEY = BASE_API + "/{id}";
 }

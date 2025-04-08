@@ -10,5 +10,4 @@ public class DeviceResponseDTO {
     private String powerRating;
     private String location;
     private Long houseId;
-
 }

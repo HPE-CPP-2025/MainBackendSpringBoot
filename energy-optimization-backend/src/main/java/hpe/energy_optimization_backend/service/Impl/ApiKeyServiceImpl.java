@@ -86,4 +86,11 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         return apiKeyMapper.toResponseDTO(apiKey, true);
     }
+
+    @Override
+    public void deleteApiKey(Long id) {
+        ApiKey apiKey = apiKeyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("API Key not found with id: " + id));
+        apiKeyRepository.delete(apiKey);
+    }
 }

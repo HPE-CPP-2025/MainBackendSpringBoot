@@ -15,4 +15,5 @@ public interface ApiKeyService {
     List<ApiKeyResponseDTO> getApiKeysByStatus(Boolean active);
     ApiKeyResponseDTO toggleApiKeyStatus(Long id);
     ApiKeyResponseDTO getApiKeyWithFullKey(Long id);
+    void deleteApiKey(Long id);
 }
