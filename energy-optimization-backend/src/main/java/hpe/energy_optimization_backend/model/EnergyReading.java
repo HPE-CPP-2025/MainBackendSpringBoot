@@ -24,6 +24,11 @@ public class EnergyReading implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Device device;
 
+    @ManyToOne
+    @JoinColumn(name = "house_id", foreignKey = @ForeignKey(name = "fk_energy_readings_houses"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private House house;
+
     @Column(name = "voltage", nullable = false)
     private Double voltage;
 

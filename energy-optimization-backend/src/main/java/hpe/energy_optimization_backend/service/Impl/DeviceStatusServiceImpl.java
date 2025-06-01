@@ -169,6 +169,12 @@ public class DeviceStatusServiceImpl implements DeviceStatusService {
             return; // No subscribers for this house
         }
 
+        // If statusDTO is null, this method was called from refreshDeviceDataForHouse,
+        // so we should return to avoid infinite recursion
+        if (statusDTO == null) {
+            return;
+        }
+
         // Get the full updated list of devices for this house
         List<DeviceStatusDTO> allDevices = getDeviceStatusesByHouseId(houseId);
 
@@ -201,5 +207,43 @@ public class DeviceStatusServiceImpl implements DeviceStatusService {
     public List<DeviceStatusDTO> getDeviceStatusForHouse(Long houseId) {
         // This simply calls our existing method that either returns from cache or builds from DB
         return getDeviceStatusesByHouseId(houseId);
+    }
+
+    @Override
+    public void refreshDeviceDataForHouse(Long houseId) {
+        log.info("Refreshing device data for house: {}", houseId);
+
+        // Clear the cache for this house
+        Cache cache = cacheManager.getCache("devicesCache");
+        if (cache != null) {
+            cache.evict(houseId);
+        }
+
+        // Get emitters for this house
+        List<SseEmitter> emitters = houseEmitters.get(houseId);
+        if (emitters != null && !emitters.isEmpty()) {
+
+            List<SseEmitter> deadEmitters = new ArrayList<>();
+            for (SseEmitter emitter : emitters) {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("CACHE_INVALIDATED")
+                            .data(Map.of("houseId", houseId)));
+                } catch (Exception e) {
+                    deadEmitters.add(emitter);
+                    log.error("Failed to send SSE update to house {}", houseId, e);
+                }
+            }
+
+            // Remove dead emitters
+            if (!deadEmitters.isEmpty()) {
+                emitters.removeAll(deadEmitters);
+                if (emitters.isEmpty()) {
+                    houseEmitters.remove(houseId);
+                }
+            }
+        }
+
+        log.debug("Device data cache refreshed for house {}", houseId);
     }
 }

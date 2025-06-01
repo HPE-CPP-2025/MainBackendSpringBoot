@@ -9,4 +9,5 @@ public interface DeviceStatusService {
     DeviceStatusDTO toggleDeviceStatus(Long deviceId);
     SseEmitter subscribeToHouseUpdates(Long houseId);
     List<DeviceStatusDTO> getDeviceStatusForHouse(Long houseId);
+    void refreshDeviceDataForHouse(Long houseId);
 }

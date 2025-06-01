@@ -1,6 +1,8 @@
 package hpe.energy_optimization_backend.controller;
 
 import hpe.energy_optimization_backend.dto.request.ForwardRequestDTO;
+import hpe.energy_optimization_backend.repository.HouseRepository;
+import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.FastApiService;
 import hpe.energy_optimization_backend.urlMapper.AgentUrlMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,9 +18,13 @@ import org.springframework.web.bind.annotation.*;
 public class ForwardController {
 
     private final FastApiService fastApiService;
+    private final HouseRepository  houseRepository;
+    private final JwtUtils jwtUtils;
 
-    public ForwardController(FastApiService fastApiService) {
+    public ForwardController(FastApiService fastApiService, HouseRepository houseRepository, JwtUtils jwtUtils) {
         this.fastApiService = fastApiService;
+        this.houseRepository = houseRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping(AgentUrlMapper.AGENT_URL)
@@ -40,7 +46,7 @@ public class ForwardController {
             @RequestBody ForwardRequestDTO requestDTO) {
         String query = requestDTO.getQuery();
         String role = requestDTO.getRole();
-        Long houseId = "HOUSE_OWNER".equals(role) ? 1L : null;
+        Long houseId = jwtUtils.getHouseIdFromContext();
         return fastApiService.forwardRequest(query, houseId);
     }
 }

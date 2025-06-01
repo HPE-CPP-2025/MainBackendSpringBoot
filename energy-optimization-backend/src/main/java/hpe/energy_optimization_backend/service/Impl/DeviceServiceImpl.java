@@ -12,6 +12,7 @@ import hpe.energy_optimization_backend.repository.DeviceRepository;
 import hpe.energy_optimization_backend.repository.HouseRepository;
 import hpe.energy_optimization_backend.security.jwt.JwtUtils;
 import hpe.energy_optimization_backend.service.DeviceService;
+import hpe.energy_optimization_backend.service.DeviceStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +25,14 @@ public class DeviceServiceImpl implements DeviceService {
     private final DeviceRepository deviceRepository;
     private final HouseRepository houseRepository;
     private final JwtUtils jwtUtils;
+    private final DeviceStatusService deviceStatusService;
 
     @Autowired
-    public DeviceServiceImpl(DeviceRepository deviceRepository, HouseRepository houseRepository, JwtUtils jwtUtils) {
+    public DeviceServiceImpl(DeviceRepository deviceRepository, HouseRepository houseRepository, JwtUtils jwtUtils, DeviceStatusService deviceStatusService) {
         this.deviceRepository = deviceRepository;
         this.houseRepository = houseRepository;
         this.jwtUtils = jwtUtils;
+        this.deviceStatusService = deviceStatusService;
     }
 
     @Override
@@ -71,7 +74,12 @@ public class DeviceServiceImpl implements DeviceService {
         House house = houseRepository.findById(dto.getHouseId())
                 .orElseThrow(() -> new HouseNotFoundException("House not found"));
         Device device = DeviceMapper.toDevice(dto, house);
-        return DeviceMapper.toDeviceResponseDTO(deviceRepository.save(device));
+        DeviceResponseDTO createdDevice = DeviceMapper.toDeviceResponseDTO(deviceRepository.save(device));
+
+        // Refresh cache and notify SSE clients about the new device
+        deviceStatusService.refreshDeviceDataForHouse(dto.getHouseId());
+
+        return createdDevice;
     }
 
     @Override
@@ -94,7 +102,13 @@ public class DeviceServiceImpl implements DeviceService {
         device.setPowerRating(dto.getPowerRating());
         device.setLocation(dto.getLocation());
         device.setHouse(house);
-        return DeviceMapper.toDeviceResponseDTO(deviceRepository.save(device));
+
+        DeviceResponseDTO updatedDevice = DeviceMapper.toDeviceResponseDTO(deviceRepository.save(device));
+
+        // Refresh cache and notify SSE clients about the updated device
+        deviceStatusService.refreshDeviceDataForHouse(dto.getHouseId());
+
+        return updatedDevice;
     }
 
     @Override
@@ -108,6 +122,12 @@ public class DeviceServiceImpl implements DeviceService {
             throw new UnauthorizedAccessException("You don't have permission to delete this device");
         }
 
+        // Store the house ID before deleting the device
+        Long houseId = device.getHouse().getHouseId();
+
         deviceRepository.deleteById(id);
+
+        // Refresh cache and notify SSE clients about the removed device
+        deviceStatusService.refreshDeviceDataForHouse(houseId);
     }
 }
